@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FizzBuzz.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FizzBuzz.Data
 {
@@ -9,5 +10,7 @@ namespace FizzBuzz.Data
             : base(options)
         {
         }
+
+        public DbSet<Games> Games { get; set; }
     }
 }
