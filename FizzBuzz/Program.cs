@@ -11,7 +11,14 @@ builder.Services.AddDbContext<FizzBuzzDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // 3) Register controllers & swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        // This tells System.Text.Json to ignore (skip) any cycles
+        // rather than throwing an exception.
+        opts.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

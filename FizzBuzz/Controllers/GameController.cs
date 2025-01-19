@@ -3,8 +3,7 @@ using FizzBuzz.Data;
 using FizzBuzz.Models;
 using FizzBuzz.Contracts;
 using Microsoft.EntityFrameworkCore;
-using FizzBuzz.Data;
-using FizzBuzz.Models;
+
 
 namespace FizzBuzz.Api.Controllers
 {
@@ -52,6 +51,21 @@ namespace FizzBuzz.Api.Controllers
             await _db.SaveChangesAsync();
 
             return Ok(new { gameId = game.Id });
+        }
+        // DELETE /api/Games/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGame(int id)
+        {
+            var game = await _db.Games.FindAsync(id);
+            if (game == null)
+                return NotFound();
+
+            // Also remove any dependent data (like rules) if you have
+            // cascade deletes or manual remove logic
+            _db.Games.Remove(game);
+            await _db.SaveChangesAsync();
+
+            return NoContent(); // or Ok()
         }
 
         /// <summary>
