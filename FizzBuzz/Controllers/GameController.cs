@@ -25,11 +25,10 @@ namespace FizzBuzz.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest request)
         {
-            // Validate input (no negative divisors, etc.)
+            // checking input 
             if (request.Rules.Any(r => r.Divisor <= 0))
                 return BadRequest("Divisor must be a positive integer.");
 
-            // Create Game entity
             var game = new Games
             {
                 Name = request.Name,
@@ -37,7 +36,7 @@ namespace FizzBuzz.Api.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Add associated rules
+            // Add  rules
             foreach (var ruleReq in request.Rules)
             {
                 game.Rules.Add(new GameRule

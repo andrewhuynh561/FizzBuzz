@@ -68,19 +68,18 @@ namespace FizzBuzz.Api.Controllers
             if (DateTime.UtcNow > session.EndTime)
                 return BadRequest("Session has expired.");
 
-            // Generate a random number
+            //   random number
             var random = new Random();
             int nextNum;
             bool duplicate;
             do
             {
-                nextNum = random.Next(1, 10001); // or any range you choose
+                nextNum = random.Next(1, 10001); 
                 duplicate = await _db.SessionRandomNumbers
                                      .AnyAsync(x => x.SessionId == sessionId && x.Number == nextNum);
             }
             while (duplicate);
 
-            // Record this number to prevent reuse
             var randomNumber = new SessionRandomNumber
             {
                 SessionId = sessionId,
@@ -88,7 +87,6 @@ namespace FizzBuzz.Api.Controllers
             };
             _db.SessionRandomNumbers.Add(randomNumber);
             await _db.SaveChangesAsync();
-
             return Ok(new { number = nextNum });
         }
 
@@ -111,10 +109,9 @@ namespace FizzBuzz.Api.Controllers
             if (DateTime.UtcNow > session.EndTime)
                 return BadRequest("Session has expired.");
 
-            // Compute the correct "FizzBuzz-like" value
             var computedAnswer = ComputeReplacement(request.Number, session.Game!.Rules);
 
-            // Compare with user's answer
+            // Compare answer
             bool isCorrect = string.Equals(request.UserAnswer, computedAnswer, StringComparison.OrdinalIgnoreCase);
 
             if (isCorrect)
