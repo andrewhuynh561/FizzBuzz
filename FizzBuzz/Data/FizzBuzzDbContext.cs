@@ -11,6 +11,11 @@ namespace FizzBuzz.Data
         {
         }
 
-        public DbSet<Games> Games { get; set; }
+       
+
+        public DbSet<Games> Games => Set<Games>();
+        public DbSet<GameRule> GameRules => Set<GameRule>();
+        public DbSet<Session> Sessions => Set<Session>();
+        public DbSet<SessionRandomNumber> SessionRandomNumbers => Set<SessionRandomNumber>();
     }
 }
