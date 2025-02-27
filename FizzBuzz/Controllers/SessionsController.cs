@@ -60,35 +60,41 @@ namespace FizzBuzz.Api.Controllers
         [HttpGet("{sessionId}/next-number")]
         public async Task<IActionResult> GetNextNumber(int sessionId)
         {
-            var session = await _db.Sessions.FindAsync(sessionId);
+            var session = await _db.Sessions
+                .Include(s => s.Game)
+                .FirstOrDefaultAsync(s => s.Id == sessionId);
+
             if (session == null)
                 return NotFound("Session not found.");
 
-            // Check if the session is expired
             if (DateTime.UtcNow > session.EndTime)
                 return BadRequest("Session has expired.");
 
-            //   random number
+            // Use the range from the game
+            var min = session.Game!.MinNumber;
+            var max = session.Game!.MaxNumber;
+
             var random = new Random();
             int nextNum;
-            bool duplicate;
+            bool isDuplicate;
             do
             {
-                nextNum = random.Next(1, 10001); 
-                duplicate = await _db.SessionRandomNumbers
-                                     .AnyAsync(x => x.SessionId == sessionId && x.Number == nextNum);
-            }
-            while (duplicate);
+                // random.Next(min, max+1) so it includes maxNumber
+                nextNum = random.Next(min, max + 1);
+                isDuplicate = await _db.SessionRandomNumbers
+                    .AnyAsync(x => x.SessionId == sessionId && x.Number == nextNum);
+            } while (isDuplicate);
 
-            var randomNumber = new SessionRandomNumber
+            _db.SessionRandomNumbers.Add(new SessionRandomNumber
             {
                 SessionId = sessionId,
                 Number = nextNum
-            };
-            _db.SessionRandomNumbers.Add(randomNumber);
+            });
             await _db.SaveChangesAsync();
+
             return Ok(new { number = nextNum });
         }
+
 
         /// <summary>
         /// POST /api/sessions/{sessionId}/answer

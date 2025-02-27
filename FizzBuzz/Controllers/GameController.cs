@@ -25,18 +25,22 @@ namespace FizzBuzz.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest request)
         {
-            // checking input 
             if (request.Rules.Any(r => r.Divisor <= 0))
-                return BadRequest("Divisor must be a positive integer.");
+                return BadRequest("Divisor must be positive.");
+
+            // Validate the range
+            if (request.MinNumber < 1 || request.MaxNumber <= request.MinNumber)
+                return BadRequest("Invalid range.");
 
             var game = new Games
             {
                 Name = request.Name,
                 Author = request.Author,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                MinNumber = request.MinNumber,
+                MaxNumber = request.MaxNumber
             };
 
-            // Add  rules
             foreach (var ruleReq in request.Rules)
             {
                 game.Rules.Add(new GameRule
@@ -51,6 +55,7 @@ namespace FizzBuzz.Api.Controllers
 
             return Ok(new { gameId = game.Id });
         }
+
         // DELETE /api/Games/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGame(int id)

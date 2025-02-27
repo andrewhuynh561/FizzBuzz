@@ -1,0 +1,118 @@
+﻿/* CreateGamePage.css */
+
+.create-game-container {
+    /* A max width so the form doesn't stretch too wide */
+    max-width: 500px;
+    /* Center horizontally */
+    margin: 2rem auto;
+    /* White background, rounded corners, and drop shadow for a card-like effect */
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    /* Set a default font family */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+    .create-game-container h1 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        /* Purple accent color for the main heading */
+        color: #7f2fff;
+    }
+
+.game-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels above each input */
+.form-label {
+    margin: 0.5rem 0 0.25rem;
+    font-weight: 600;
+    color: #555;
+}
+
+/* Standard text inputs */
+.text-input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+/* Container for the rules (the repeating rows) */
+.rules-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Each row for "When divisible by X say Y" */
+.rule-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Small input fields for divisor and replacement text */
+.small-input {
+    width: 60px;
+    padding: 0.4rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Buttons for adding and removing rules */
+.add-rule-btn,
+.remove-rule-btn {
+    background-color: transparent;
+    border: none;
+    color: #7f2fff;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+}
+
+.remove-rule-btn {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* Container for the min/max range inputs */
+.range-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+    .range-container div {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .range-container label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        color: #555;
+    }
+
+/* The main "Create Game!" submit button */
+.create-btn {
+    background-color: #7f2fff;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .create-btn:hover {
+        background-color: #651ecc;
+    }

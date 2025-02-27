@@ -1,55 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-
-interface Game {
-    id: number;
-    name: string;
-    author: string;
-    createdAt: string;
-    // ... any other properties you might have
-}
+import React from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
+import CreateGamePage from './pages/CreateGamePage';
+import StartSessionPage from './pages/StartSessionPage';
+import PlayGamePage from './pages/PlayGamePage';
+import ResultsPage from './pages/ResultsPage';
 
 function App() {
-    const [games, setGames] = useState<Game[]>([]);
-    const [error, setError] = useState<string>("");
-
-    useEffect(() => {
-        // Example: Fetch a list of games from the .NET API
-        fetch("https://localhost:7178/api/Games")
-            .then(async (response) => {
-                if (!response.ok) {
-                    // If server returned an error code, read the message
-                    const message = await response.text();
-                    throw new Error(message);
-                }
-                return response.json();
-            })
-            .then((data: Game[]) => {
-                // data should be an array of games
-                setGames(data);
-            })
-            .catch((err) => {
-                setError(err.message || "An error occurred while fetching games.");
-            });
-    }, []);
-
     return (
-        <div className="App">
-            <h1>FizzBuzz React App</h1>
+        <div>
+            <nav>
+                <Link to="/create-game">Create Game</Link> |
+                <Link to="/start-session">Start Session</Link>
+            </nav>
 
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-
-            {games.length > 0 ? (
-                <ul>
-                    {games.map((game) => (
-                        <li key={game.id}>
-                            <strong>{game.name}</strong> by {game.author} (Created: {game.createdAt})
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No games found or still loading...</p>
-            )}
+            <Routes>
+                <Route path="/create-game" element={<CreateGamePage />} />
+                <Route path="/start-session" element={<StartSessionPage />} />
+                <Route path="/play/:sessionId" element={<PlayGamePage />} />
+                <Route path="/results/:sessionId" element={<ResultsPage />} />
+            </Routes>
         </div>
     );
 }
