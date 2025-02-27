@@ -1,5 +1,14 @@
-﻿import React, { useState } from 'react';
-import '../CSS/CreateGamePage.css'; // We'll define some basic CSS classes here
+﻿import React, { useEffect, useState } from 'react';
+import '../CSS/CreateGamePage.css'; // Adjust the path to your CSS file
+
+interface Game {
+    id: number;
+    name: string;
+    author: string;
+    minNumber: number;
+    maxNumber: number;
+    // If your backend returns more fields, add them here
+}
 
 interface Rule {
     divisor: number;
@@ -7,12 +16,31 @@ interface Rule {
 }
 
 function CreateGamePage() {
+    // State to store existing games (fetched from the API)
+    const [games, setGames] = useState<Game[]>([]);
+
+    // State for creating a new game
     const [gameName, setGameName] = useState("");
     const [authorName, setAuthorName] = useState("");
     const [rules, setRules] = useState<Rule[]>([{ divisor: 0, replacementText: "" }]);
     const [minNumber, setMinNumber] = useState(1);
     const [maxNumber, setMaxNumber] = useState(100);
 
+    // 1. Fetch existing games on component mount
+    useEffect(() => {
+        fetch("https://localhost:7178/api/Games") // Ensure your .NET app is on this URL/port
+            .then(async (res) => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Error fetching games: ${text}`);
+                }
+                return res.json();
+            })
+            .then((data: Game[]) => setGames(data))
+            .catch((err) => console.error(err));
+    }, []);
+
+    // 2. Handlers for the form inputs
     const handleAddRule = () => {
         setRules([...rules, { divisor: 0, replacementText: "" }]);
     };
@@ -33,10 +61,10 @@ function CreateGamePage() {
         setRules(updatedRules);
     };
 
+    // 3. Submitting the new game to the API
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // This is where you'd do your fetch POST request:
         fetch("https://localhost:7178/api/Games", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -56,19 +84,48 @@ function CreateGamePage() {
                 }
                 const data = await response.json();
                 alert(`Game created successfully! ID: ${data.gameId}`);
+
+                // Optionally fetch the updated list of games to show the new one
+                const updatedGames = await fetch("https://localhost:7178/api/Games").then(res => res.json());
+                setGames(updatedGames);
+
+                // Reset form fields (optional)
+                setGameName("");
+                setAuthorName("");
+                setRules([{ divisor: 0, replacementText: "" }]);
+                setMinNumber(1);
+                setMaxNumber(100);
             })
             .catch(err => {
                 console.error("Fetch error:", err);
                 alert("Failed to create game. Check console for details.");
             });
-
     };
 
     return (
         <div className="create-game-container">
             <h1>Create Your Own FizzBuzz Game!</h1>
+
+            {/* Display existing games at the top */}
+            <div className="existing-games-container" style={{ marginBottom: "2rem" }}>
+                <h2>Existing Games</h2>
+                {games.length === 0 ? (
+                    <p>No games found.</p>
+                ) : (
+                    <ul>
+                        {games.map((g) => (
+                            <li key={g.id}>
+                                <strong>{g.name}</strong> by {g.author} <br />
+                                Range: {g.minNumber} - {g.maxNumber}
+                                {/* If you have rules in the GET response, you could display them too */}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
+            {/* Create Game Form */}
             <form className="game-form" onSubmit={handleSubmit}>
-                {/* Game Name */}
                 <label className="form-label">Game Name</label>
                 <input
                     type="text"
@@ -79,7 +136,6 @@ function CreateGamePage() {
                     required
                 />
 
-                {/* Author Name */}
                 <label className="form-label">Your Name</label>
                 <input
                     type="text"
@@ -90,7 +146,6 @@ function CreateGamePage() {
                     required
                 />
 
-                {/* Rules */}
                 <label className="form-label">Game Rules</label>
                 <div className="rules-container">
                     {rules.map((rule, index) => (
@@ -133,7 +188,6 @@ function CreateGamePage() {
                     </button>
                 </div>
 
-                {/* Number Range */}
                 <label className="form-label">Number Range</label>
                 <div className="range-container">
                     <div>
@@ -158,7 +212,6 @@ function CreateGamePage() {
                     </div>
                 </div>
 
-                {/* Submit Button */}
                 <button type="submit" className="create-btn">
                     Create Game!
                 </button>
