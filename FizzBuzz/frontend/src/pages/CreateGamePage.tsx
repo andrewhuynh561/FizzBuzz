@@ -1,13 +1,12 @@
 ﻿import React, { useEffect, useState } from 'react';
-import '../CSS/CreateGamePage.css'; // Adjust the path to your CSS file
-
+import '../CSS/CreateGamePage.css'; 
 interface Game {
     id: number;
     name: string;
     author: string;
     minNumber: number;
     maxNumber: number;
-    // If your backend returns more fields, add them here
+    
 }
 
 interface Rule {
@@ -16,19 +15,17 @@ interface Rule {
 }
 
 function CreateGamePage() {
-    // State to store existing games (fetched from the API)
+    
     const [games, setGames] = useState<Game[]>([]);
-
-    // State for creating a new game
     const [gameName, setGameName] = useState("");
     const [authorName, setAuthorName] = useState("");
     const [rules, setRules] = useState<Rule[]>([{ divisor: 0, replacementText: "" }]);
     const [minNumber, setMinNumber] = useState(1);
     const [maxNumber, setMaxNumber] = useState(100);
 
-    // 1. Fetch existing games on component mount
+    
     useEffect(() => {
-        fetch("https://localhost:7178/api/Games") // Ensure your .NET app is on this URL/port
+        fetch("https://localhost:7178/api/Games") 
             .then(async (res) => {
                 if (!res.ok) {
                     const text = await res.text();
@@ -40,7 +37,7 @@ function CreateGamePage() {
             .catch((err) => console.error(err));
     }, []);
 
-    // 2. Handlers for the form inputs
+  
     const handleAddRule = () => {
         setRules([...rules, { divisor: 0, replacementText: "" }]);
     };
@@ -61,7 +58,7 @@ function CreateGamePage() {
         setRules(updatedRules);
     };
 
-    // 3. Submitting the new game to the API
+  
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -85,11 +82,11 @@ function CreateGamePage() {
                 const data = await response.json();
                 alert(`Game created successfully! ID: ${data.gameId}`);
 
-                // Optionally fetch the updated list of games to show the new one
+                
                 const updatedGames = await fetch("https://localhost:7178/api/Games").then(res => res.json());
                 setGames(updatedGames);
 
-                // Reset form fields (optional)
+               
                 setGameName("");
                 setAuthorName("");
                 setRules([{ divisor: 0, replacementText: "" }]);
@@ -106,7 +103,7 @@ function CreateGamePage() {
         <div className="create-game-container">
             <h1>Create Your Own FizzBuzz Game!</h1>
 
-            {/* Display existing games at the top */}
+            {}
             <div className="existing-games-container" style={{ marginBottom: "2rem" }}>
                 <h2>Existing Games</h2>
                 {games.length === 0 ? (
@@ -117,14 +114,14 @@ function CreateGamePage() {
                             <li key={g.id}>
                                 <strong>{g.name}</strong> by {g.author} <br />
                                 Range: {g.minNumber} - {g.maxNumber}
-                                {/* If you have rules in the GET response, you could display them too */}
+                               
                             </li>
                         ))}
                     </ul>
                 )}
             </div>
 
-            {/* Create Game Form */}
+         
             <form className="game-form" onSubmit={handleSubmit}>
                 <label className="form-label">Game Name</label>
                 <input
