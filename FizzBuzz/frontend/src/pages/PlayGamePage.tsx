@@ -1,9 +1,7 @@
 ﻿import { useEffect, useState, useRef } from 'react';
-import '../CSS/PlayGamePage.css'; // Optional: style as you wish
+import '../CSS/PlayGamePage.css';
 
-/********************************************
- * Interfaces matching your .NET models
- ********************************************/
+// Interfaces to define the shape of game data
 interface GameRule {
     id?: number;
     divisor: number;
@@ -15,47 +13,34 @@ interface Game {
     name: string;
     author: string;
     rules: GameRule[];
-    // Possibly minNumber, maxNumber, etc. if you store them
 }
 
 interface StartSessionResponse {
     sessionId: number;
-    endTime: string; // server might return an ISO date string
+    endTime: string;
 }
 
 function PlayGamePage() {
-    /********************************************
-     * State for "select game" phase
-     ********************************************/
+    // Store available games and selected game ID
     const [games, setGames] = useState<Game[]>([]);
     const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
     const [durationSeconds, setDurationSeconds] = useState<number>(60);
 
-    /********************************************
-     * State for "session" phase
-     ********************************************/
+    // Track session details (session ID, end time, time left)
     const [sessionId, setSessionId] = useState<number | null>(null);
     const [endTime, setEndTime] = useState<Date | null>(null);
     const [timeLeft, setTimeLeft] = useState<number>(0);
 
-    /********************************************
-     * Gameplay: random number, user input, scoreboard
-     ********************************************/
+    // Track game progress (current number, user input, score)
     const [currentNumber, setCurrentNumber] = useState<number | null>(null);
     const [userAnswer, setUserAnswer] = useState("");
     const [correctCount, setCorrectCount] = useState(0);
     const [incorrectCount, setIncorrectCount] = useState(0);
 
-    /********************************************
-     * Refs / Timers
-     ********************************************/
+    // Timer reference to manage countdown
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-
-
-    /********************************************
-     * 1) Fetch list of games on mount
-     ********************************************/
+    // Fetch available games when the component loads
     useEffect(() => {
         fetch("https://localhost:7178/api/Games")
             .then(async (res) => {
@@ -67,7 +52,6 @@ function PlayGamePage() {
             })
             .then((data: Game[]) => {
                 setGames(data);
-                // Optionally auto-select the first game
                 if (data.length > 0) {
                     setSelectedGameId(data[0].id);
                 }
@@ -78,9 +62,7 @@ function PlayGamePage() {
             });
     }, []);
 
-    /********************************************
-     * 2) Start session
-     ********************************************/
+    // Start a new game session when user clicks "Start Game"
     const handleStartSession = async () => {
         if (!selectedGameId) {
             alert("Please select a game first.");
@@ -96,31 +78,26 @@ function PlayGamePage() {
                     durationSeconds: durationSeconds,
                 }),
             });
+
             if (!response.ok) {
                 const text = await response.text();
                 throw new Error(`Start session error: ${text}`);
             }
-            const data: StartSessionResponse = await response.json();
 
-            // sessionId & endTime from server
+            const data: StartSessionResponse = await response.json();
             setSessionId(data.sessionId);
-            const end = new Date(data.endTime); // parse ISO string
+            const end = new Date(data.endTime);
             setEndTime(end);
 
-            // Initialize scoreboard
             setCorrectCount(0);
             setIncorrectCount(0);
 
-            // Start countdown
             if (timerRef.current) clearInterval(timerRef.current);
             timerRef.current = setInterval(() => {
                 updateTimeLeft(end);
             }, 1000);
 
-            // Immediately update timeLeft
             updateTimeLeft(end);
-
-            // Fetch the first random number
             fetchNextNumber(data.sessionId);
 
         } catch (error) {
@@ -129,25 +106,20 @@ function PlayGamePage() {
         }
     };
 
-    /********************************************
-     * 3) Update time left
-     ********************************************/
+    // Update the remaining time every second
     const updateTimeLeft = (end: Date) => {
         const now = new Date();
-        const diffMs = end.getTime() - now.getTime(); // milliseconds
+        const diffMs = end.getTime() - now.getTime();
         const diffSec = Math.max(0, Math.floor(diffMs / 1000));
         setTimeLeft(diffSec);
 
-        // If time is up, clear the interval
         if (diffSec <= 0 && timerRef.current) {
             clearInterval(timerRef.current);
             timerRef.current = null;
         }
     };
 
-    /********************************************
-     * 4) Fetch next random number from server
-     ********************************************/
+    // Request a new random number from the server
     const fetchNextNumber = async (sessionIdValue: number) => {
         try {
             const response = await fetch(
@@ -166,9 +138,7 @@ function PlayGamePage() {
         }
     };
 
-    /********************************************
-     * 5) Submit answer to server
-     ********************************************/
+    // Submit player's answer to the server for validation
     const handleSubmitAnswer = async () => {
         if (!sessionId || currentNumber === null) return;
 
@@ -184,19 +154,19 @@ function PlayGamePage() {
                     }),
                 }
             );
+
             if (!response.ok) {
                 const text = await response.text();
                 throw new Error(`Submit answer error: ${text}`);
             }
+
             const data = await response.json();
-            // data.correct => boolean, data.expected => string
             if (data.correct) {
                 setCorrectCount((prev) => prev + 1);
             } else {
                 setIncorrectCount((prev) => prev + 1);
             }
 
-            // Fetch next random number
             fetchNextNumber(sessionId);
         } catch (error) {
             console.error(error);
@@ -204,9 +174,7 @@ function PlayGamePage() {
         }
     };
 
-    /********************************************
-     * Cleanup on unmount
-     ********************************************/
+    // Clear the timer when the component unmounts
     useEffect(() => {
         return () => {
             if (timerRef.current) {
@@ -215,24 +183,16 @@ function PlayGamePage() {
         };
     }, []);
 
-    /********************************************
-     * Helper: Is the game running or is time up?
-     ********************************************/
+    // Determine if the game is still active
     const isGameActive = sessionId !== null && timeLeft > 0;
 
-    /********************************************
-     * Render
-     ********************************************/
-    // 1) If no session started, show "Select Game" & "Duration" & "Start"
-    // 2) If session started, show the main game UI
-    // 3) Display rules from the selected game
+    // Find the currently selected game to display its rules
     const currentGame = games.find((g) => g.id === selectedGameId);
 
     return (
         <div className="play-game-page">
             <h1>Play a FizzBuzz-like Game</h1>
 
-            {/* If session not started, let user pick game & duration */}
             {!sessionId && (
                 <div className="setup-section">
                     <div>
@@ -260,7 +220,6 @@ function PlayGamePage() {
                 </div>
             )}
 
-            {/* If a game is selected, show its rules */}
             {currentGame && (
                 <div className="rules-box">
                     <h2>Game Rules for {currentGame.name}</h2>
@@ -270,14 +229,11 @@ function PlayGamePage() {
                                 If divisible by {rule.divisor}, say "{rule.replacementText}"
                             </li>
                         ))}
-                        <li>
-                            If a number is divisible by multiple divisors, concatenate the words!
-                        </li>
+                        <li>If a number is divisible by multiple divisors, concatenate the words!</li>
                     </ul>
                 </div>
             )}
 
-            {/* If session is started, show the game UI */}
             {sessionId && (
                 <div className="gameplay-section">
                     <div className="timer-display">
