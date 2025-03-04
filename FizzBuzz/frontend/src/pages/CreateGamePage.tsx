@@ -79,8 +79,8 @@ function CreateGamePage() {
                     alert(`Error creating game: ${text}`);
                     return;
                 }
-                const data = await response.json();
-                alert(`Game created successfully! ID: ${data.gameId}`);
+                //const data = await response.json();
+                //alert(`Game created successfully! ID: ${data.gameId}`);
 
                 
                 const updatedGames = await fetch("https://localhost:7178/api/Games").then(res => res.json());

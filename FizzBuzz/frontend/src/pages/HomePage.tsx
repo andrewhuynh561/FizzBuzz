@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../CSS/HomePage.css'; // We'll define CSS in a separate file
+import '../CSS/HomePage.css'; 
 
 function HomePage() {
     const navigate = useNavigate();
@@ -11,7 +11,8 @@ function HomePage() {
     };
 
     const handlePlayGame = () => {
-        navigate('/play'); // or whichever route you use
+        navigate('/play/12'); // asumming navigate to play with sesion 12
+
     };
 
     return (
