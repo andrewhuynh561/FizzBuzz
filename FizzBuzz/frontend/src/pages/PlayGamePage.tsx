@@ -291,17 +291,25 @@ function PlayGamePage() {
                     </div>
 
                     <div className="answer-area">
-                        <input
-                            type="text"
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)}
-                            placeholder="Your answer..."
-                            disabled={!isGameActive}
-                        />
-                        <button onClick={handleSubmitAnswer} disabled={!isGameActive}>
-                            Submit
-                        </button>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleSubmitAnswer();
+                            }}
+                        >
+                            <input
+                                type="text"
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                placeholder="Your answer..."
+                                disabled={!isGameActive}
+                            />
+                            <button type="submit" disabled={!isGameActive}>
+                                Submit
+                            </button>
+                        </form>
                     </div>
+
 
                     <div className="scoreboard">
                         <div className="score correct">Correct: {correctCount}</div>

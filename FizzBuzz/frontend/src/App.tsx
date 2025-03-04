@@ -8,7 +8,9 @@ function App() {
         <div>
             {/*<nav>*/}
             {/*    <Link to="/">Play Game</Link> | */}{/* Link to the default page */}
-                <Link to="/">Home</Link>
+            <Link to="/" reloadDocument>
+                Home
+            </Link>
             {/*</nav>*/}
 
             <Routes>              

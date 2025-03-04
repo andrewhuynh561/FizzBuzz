@@ -20,9 +20,7 @@ function HomePage() {
             <h1 className="home-title">FIZZ BUZZER</h1>
 
             <p className="home-description">
-                FizzBuzz! In this game, you’ll replace numbers with quirky words—like ‘Foo’
-                and ‘Boo’—whenever certain divisibility rules apply. If a number matches multiple rules, stack the words together!
-                It’s a lighthearted way to sharpen your number sense and challenge your mind, all while having a blast :)).
+                FizzBuzz! In this playful game, you swap numbers for silly words like ‘Foo’ or ‘Boo’ whenever they match special rules. If a number follows more than one rule, just squish the words together! It’s a fun way to learn about numbers and have a great time!:)).
             </p>
 
             <div className="boxes-container">
