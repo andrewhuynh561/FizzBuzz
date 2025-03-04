@@ -7,7 +7,7 @@ function HomePage() {
 
     // Handlers to navigate to other pages
     const handleCreateGame = () => {
-        navigate('/create-game'); // or whichever route you use
+        navigate('/create-game'); 
     };
 
     const handlePlayGame = () => {
@@ -26,18 +26,17 @@ function HomePage() {
             </p>
 
             <div className="boxes-container">
-                <div className="box box-foo">Foo</div>
-                <div className="box box-boo">Boo</div>
-            </div>
-
-            <div className="buttons-container">
-                <button className="nav-button" onClick={handleCreateGame}>
+                {/*<div className="box box-foo">Foo</div>*/}
+                {/*<div className="box box-boo">Boo</div>*/}
+                <button className="box box-foo" onClick={handleCreateGame}>
                     Create Game
                 </button>
-                <button className="nav-button" onClick={handlePlayGame}>
+                <button className="box box-boo" onClick={handlePlayGame}>
                     Play Game
                 </button>
             </div>
+
+  
         </div>
     );
 }
