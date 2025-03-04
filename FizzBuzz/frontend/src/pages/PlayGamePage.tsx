@@ -191,7 +191,7 @@ function PlayGamePage() {
 
     return (
         <div className="play-game-page">
-            <h1>Play a FizzBuzz-like Game</h1>
+            <h1 className="tile">Play a FizzBuzz Game</h1>
 
             {!sessionId && (
                 <div className="setup-section">

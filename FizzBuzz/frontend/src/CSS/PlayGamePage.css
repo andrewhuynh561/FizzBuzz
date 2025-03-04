@@ -1,9 +1,26 @@
 ﻿.play-game-page {
-    max-width: 600px;
-    margin: 2rem auto;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 130vh;
+    /* Example: a different background image or color from your create page */
+    background: url('../assets/2.jpg') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #0e0202; /* or suitable color for text */
+    position: relative;
+    padding: 2rem;
+    font-size:1.5rem;
+
 }
 
+/*.setup-section, .rules-box, .gameplay-section {
+    background-color: rgba(0, 0, 0, 0.5);*/ /* optional translucent box if text is hard to read */
+    /*border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 600px;
+}*/
 .setup-section {
     background: #f5f5f5;
     padding: 1rem;
@@ -12,6 +29,7 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    /*background: url('../assets/1.jpg') no-repeat center center;*/
 }
 
 .rules-box {

@@ -22,19 +22,19 @@
 
 /* Large, bold heading */
 .home-title {
-    font-size: 4.5rem;
+    font-size: 5.5rem;
     margin-bottom: 1rem;
-    color: #00939a;
+    color: #f74343;
     letter-spacing: 1px;
 }
 
 /* Paragraph for the game description */
 .home-description {
-    font-size: 1rem;
+    font-size: 1.2rem;
     line-height: 2.5;
     margin-bottom: 2rem;
     max-width: 500px;
-    color: #00939a;
+    color: #090560;
 }
 
 /* Boxes container: put them side by side with a gap */
