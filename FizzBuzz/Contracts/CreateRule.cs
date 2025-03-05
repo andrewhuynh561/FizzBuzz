@@ -1,6 +1,6 @@
 ﻿namespace FizzBuzz.Contracts
 {
-    public class CreateGameRuleRequest
+    public class CreateRule
     {
         public int Divisor { get; set; }
         public string ReplacementText { get; set; } = default!;

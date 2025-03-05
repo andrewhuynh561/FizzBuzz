@@ -23,7 +23,7 @@ namespace FizzBuzz.Api.Controllers
         /// Creates a new custom FizzBuzz-like game definition
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest request)
+        public async Task<IActionResult> CreateGame([FromBody] CreateGame request)
         {
             if (request.Rules.Any(r => r.Divisor <= 0))
                 return BadRequest("Divisor must be positive.");

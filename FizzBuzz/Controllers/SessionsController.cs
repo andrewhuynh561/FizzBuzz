@@ -24,7 +24,7 @@ namespace FizzBuzz.Api.Controllers
         /// Starts a new game session for the specified game
         /// </summary>
         [HttpPost("start")]
-        public async Task<IActionResult> StartSession([FromBody] StartSessionRequest request)
+        public async Task<IActionResult> StartSession([FromBody] StartSession request)
         {
             // Validate the game exists
             var game = await _db.Games.Include(g => g.Rules)
@@ -101,7 +101,7 @@ namespace FizzBuzz.Api.Controllers
         /// Submits an answer for the given random number
         /// </summary>
         [HttpPost("{sessionId}/answer")]
-        public async Task<IActionResult> SubmitAnswer(int sessionId, [FromBody] SubmitAnswerRequest request)
+        public async Task<IActionResult> SubmitAnswer(int sessionId, [FromBody] SubmitAnswer request)
         {
             var session = await _db.Sessions
                                    .Include(s => s.Game)

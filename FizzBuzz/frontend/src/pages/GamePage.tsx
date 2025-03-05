@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
-import '../CSS/CreateGamePage.css'; 
+import '../CSS/GamePage.css'; 
 interface Game {
     id: number;
     name: string;
@@ -95,7 +95,7 @@ function CreateGamePage() {
             })
             .catch(err => {
                 console.error("Fetch error:", err);
-                alert("Failed to create game. Check console for details.");
+                alert("Failed to create game.");
             });
     };
 

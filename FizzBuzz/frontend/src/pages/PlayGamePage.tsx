@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, useRef } from 'react';
-import '../CSS/PlayGamePage.css'; // Adjust path as needed
+import '../CSS/PlayGamePage.css';
 import timerSound from '../assets/sounds/timer.mp3';
 import correctSound from '../assets/sounds/correct.mp3';
 import incorrectSound from '../assets/sounds/incorrect.mp3';
