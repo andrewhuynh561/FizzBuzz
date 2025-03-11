@@ -20,7 +20,7 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// POST /api/games
-        /// Creates a new custom FizzBuzz-like game definition
+        /// Creates a new custom FizzBuzz game 
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateGame([FromBody] CreateGame request)
@@ -30,7 +30,7 @@ namespace FizzBuzz.Api.Controllers
 
             // Validate the range
             if (request.MinNumber < 1 || request.MaxNumber <= request.MinNumber)
-                return BadRequest("Invalid range.");
+                return BadRequest("Invalid range number.");
 
             var game = new Games
             {

@@ -1,6 +1,6 @@
 import { Routes, Route,Link } from 'react-router-dom';
 import CreateGamePage from './pages/GamePage';
-import PlayGamePage from './pages/PlayGamePage';
+import PlayGamePage from './pages/PlayGame';
 import HomePage from './pages/HomePage';
 
 function App() {
