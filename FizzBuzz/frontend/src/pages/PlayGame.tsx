@@ -3,6 +3,8 @@ import '../CSS/PlayGame.css';
 import timerSound from '../assets/sounds/timer.mp3';
 import correctSound from '../assets/sounds/correct.mp3';
 import incorrectSound from '../assets/sounds/incorrect.mp3';
+// NEW: import winning sound
+import winningSound from '../assets/sounds/winning.mp3';
 
 interface GameRule {
     id?: number;
@@ -37,6 +39,8 @@ function PlayGamePage() {
     const beepAudio = useRef<HTMLAudioElement | null>(null);
     const correctAudio = useRef<HTMLAudioElement | null>(null);
     const incorrectAudio = useRef<HTMLAudioElement | null>(null);
+    // NEW: winning audio ref
+    const winningAudio = useRef<HTMLAudioElement | null>(null);
 
     // 4) Gameplay
     const [currentNumber, setCurrentNumber] = useState<number | null>(null);
@@ -47,16 +51,20 @@ function PlayGamePage() {
     // Timer reference (for clearing interval on unmount)
     const timerRef = useRef<NodeJS.Timer | null>(null);
 
-    
+    // NEW: final results popup state
+    const [showResults, setShowResults] = useState(false);
+
+    // total attempts
+    const totalAttempts = correctCount + incorrectCount;
+
     useEffect(() => {
         beepAudio.current = new Audio(timerSound);
         correctAudio.current = new Audio(correctSound);
         incorrectAudio.current = new Audio(incorrectSound);
-
-        // Optional: set volume levels, e.g. beepAudio.current.volume = 0.5;
+        // NEW: initialize winning audio
+        winningAudio.current = new Audio(winningSound);
     }, []);
 
-   
     useEffect(() => {
         fetch("https://localhost:7178/api/Games")
             .then(async (res) => {
@@ -78,7 +86,6 @@ function PlayGamePage() {
             });
     }, []);
 
-    
     const handleStartSession = async () => {
         if (!selectedGameId) {
             alert("Please select a game first.");
@@ -139,17 +146,16 @@ function PlayGamePage() {
         if (diffSec <= 0 && timerRef.current) {
             clearInterval(timerRef.current);
             timerRef.current = null;
+            // NEW: play winning sound & show final popup
+            winningAudio.current?.play();
+            setShowResults(true);
         }
     };
 
-   
-   
     useEffect(() => {
         const isGameActive = sessionId !== null && timeLeft > 0;
         if (isGameActive) {
-            // Play the beep sound each time timeLeft updates (except maybe timeLeft=0)
             beepAudio.current?.play().catch((err) => {
-                // Some browsers block autoplay if no user interaction
                 console.warn("Beep audio failed to play:", err);
             });
         }
@@ -173,7 +179,6 @@ function PlayGamePage() {
         }
     };
 
- 
     const handleSubmitAnswer = async () => {
         if (!sessionId || currentNumber === null) return;
 
@@ -198,11 +203,9 @@ function PlayGamePage() {
             const data = await response.json();
             if (data.correct) {
                 setCorrectCount((prev) => prev + 1);
-                // Play correct sound
                 correctAudio.current?.play();
             } else {
                 setIncorrectCount((prev) => prev + 1);
-                // Play incorrect sound
                 incorrectAudio.current?.play();
             }
 
@@ -222,8 +225,6 @@ function PlayGamePage() {
     }, []);
 
     const isGameActive = sessionId !== null && timeLeft > 0;
-
-   
     const currentGame = games.find((g) => g.id === selectedGameId);
 
     return (
@@ -257,7 +258,6 @@ function PlayGamePage() {
                 </div>
             )}
 
-           
             {currentGame && (
                 <div className="rules-box">
                     <h2>Game Rules for {currentGame.name}</h2>
@@ -275,7 +275,6 @@ function PlayGamePage() {
                 </div>
             )}
 
-          
             {sessionId && (
                 <div className="gameplay-section">
                     <div className="timer-display">
@@ -310,10 +309,21 @@ function PlayGamePage() {
                         </form>
                     </div>
 
-
                     <div className="scoreboard">
                         <div className="score correct">Correct: {correctCount}</div>
                         <div className="score incorrect">Incorrect: {incorrectCount}</div>
+                    </div>
+                </div>
+            )}
+
+            {/* Minimal "winning" display if time is up */}
+            {(!isGameActive && sessionId) && (
+                <div className="winning-popup">
+                    <div className="winning-content">
+                        <h2>Congratulations!</h2>
+                        <p>
+                            You got {correctCount} correct out of {correctCount + incorrectCount} attempts!
+                        </p>
                     </div>
                 </div>
             )}
