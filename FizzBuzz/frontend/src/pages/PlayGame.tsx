@@ -6,6 +6,9 @@ import incorrectSound from '../assets/sounds/incorrect.mp3';
 // NEW: import winning sound
 import winningSound from '../assets/sounds/winning.mp3';
 
+// Add NodeJS types
+/// <reference types="node" />
+
 interface GameRule {
     id?: number;
     divisor: number;
@@ -32,7 +35,6 @@ function PlayGamePage() {
 
     // 2) Session & Timer
     const [sessionId, setSessionId] = useState<number | null>(null);
-    const [endTime, setEndTime] = useState<Date | null>(null);
     const [timeLeft, setTimeLeft] = useState<number>(0);
 
     // 3) Audio references
@@ -48,14 +50,8 @@ function PlayGamePage() {
     const [correctCount, setCorrectCount] = useState(0);
     const [incorrectCount, setIncorrectCount] = useState(0);
 
-    // Timer reference (for clearing interval on unmount)
-    const timerRef = useRef<NodeJS.Timer | null>(null);
-
-    // NEW: final results popup state
-    const [showResults, setShowResults] = useState(false);
-
-    // total attempts
-    const totalAttempts = correctCount + incorrectCount;
+    // Fix timer type to use ReturnType<typeof setInterval>
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
         beepAudio.current = new Audio(timerSound);
@@ -109,9 +105,12 @@ function PlayGamePage() {
             const data: StartSessionResponse = await response.json();
             setSessionId(data.sessionId);
 
-            // Convert endTime string to Date
+            // Convert endTime string to Date and calculate timeLeft
             const end = new Date(data.endTime);
-            setEndTime(end);
+            const now = new Date();
+            const diffMs = end.getTime() - now.getTime();
+            const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+            setTimeLeft(diffSec);
 
             // Reset scoreboard
             setCorrectCount(0);
@@ -122,33 +121,23 @@ function PlayGamePage() {
 
             // Start interval for countdown
             timerRef.current = setInterval(() => {
-                updateTimeLeft(end);
-            }, 1000);
+                const now = new Date();
+                const diffMs = end.getTime() - now.getTime();
+                const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+                setTimeLeft(diffSec);
 
-            // Immediately update timeLeft
-            updateTimeLeft(end);
+                if (diffSec <= 0 && timerRef.current) {
+                    clearInterval(timerRef.current);
+                    timerRef.current = null;
+                    winningAudio.current?.play();
+                }
+            }, 1000);
 
             // Fetch the first random number
             fetchNextNumber(data.sessionId);
         } catch (error) {
             console.error(error);
             alert(String(error));
-        }
-    };
-
-    const updateTimeLeft = (end: Date) => {
-        const now = new Date();
-        const diffMs = end.getTime() - now.getTime();
-        const diffSec = Math.max(0, Math.floor(diffMs / 1000));
-        setTimeLeft(diffSec);
-
-        // If time is up, clear the interval
-        if (diffSec <= 0 && timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-            // NEW: play winning sound & show final popup
-            winningAudio.current?.play();
-            setShowResults(true);
         }
     };
 

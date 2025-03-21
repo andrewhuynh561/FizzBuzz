@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: FizzBuzz/Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=172.29.208.1;Database=FizzBuzzDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - fizzbuzz-network
+
+  frontend:
+    build:
+      context: ./FizzBuzz/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - fizzbuzz-network
+
+networks:
+  fizzbuzz-network:
+    driver: bridge 

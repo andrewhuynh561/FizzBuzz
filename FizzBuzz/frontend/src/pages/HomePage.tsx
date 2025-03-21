@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿// import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../CSS/HomePage.css'; 
 
@@ -20,7 +20,7 @@ function HomePage() {
             <h1 className="home-title">FIZZ BUZZER</h1>
 
             <p className="home-description">
-                FizzBuzz! In this playful game, you swap numbers for silly words like ‘Foo’ or ‘Boo’ whenever they match special rules. If a number follows more than one rule, just squish the words together! It’s a fun way to learn about numbers and have a great time!:)).
+                FizzBuzz! In this playful game, you swap numbers for silly words like 'Foo' or 'Boo' whenever they match special rules. If a number follows more than one rule, just squish the words together! It's a fun way to learn about numbers and have a great time!:)).
             </p>
 
             <div className="boxes-container">
