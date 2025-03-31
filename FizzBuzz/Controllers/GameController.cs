@@ -20,7 +20,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// POST /api/games
-        /// Creates a new custom FizzBuzz game 
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateGame([FromBody] CreateGame request)
@@ -64,8 +63,6 @@ namespace FizzBuzz.Api.Controllers
             if (game == null)
                 return NotFound();
 
-            // Also remove any dependent data (like rules) if you have
-            // cascade deletes or manual remove logic
             _db.Games.Remove(game);
             await _db.SaveChangesAsync();
 
@@ -74,7 +71,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// GET /api/games/{id}
-        /// Retrieves a specific game definition by ID
         /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGameById(int id)
@@ -91,7 +87,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// GET /api/games
-        /// Retrieve all game definitions (example usage).
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAllGames()

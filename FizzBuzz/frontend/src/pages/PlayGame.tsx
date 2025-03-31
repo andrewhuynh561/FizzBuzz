@@ -62,24 +62,23 @@ function PlayGamePage() {
     }, []);
 
     useEffect(() => {
-        fetch("https://localhost:7178/api/Games")
-            .then(async (res) => {
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(`Error fetching games: ${text}`);
+        const fetchGames = async () => {
+            try {
+                const response = await fetch("/api/Games");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return res.json();
-            })
-            .then((data: Game[]) => {
+                const data = await response.json();
                 setGames(data);
                 if (data.length > 0) {
                     setSelectedGameId(data[0].id);
                 }
-            })
-            .catch((err) => {
-                console.error(err);
-                alert("Failed to load games. Check console for details.");
-            });
+            } catch (error) {
+                console.error("Error fetching games:", error);
+            }
+        };
+
+        fetchGames();
     }, []);
 
     const handleStartSession = async () => {
@@ -88,7 +87,7 @@ function PlayGamePage() {
             return;
         }
         try {
-            const response = await fetch("https://localhost:7178/api/Sessions/start", {
+            const response = await fetch("/api/Sessions/start", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -153,44 +152,38 @@ function PlayGamePage() {
     const fetchNextNumber = async (sessionIdValue: number) => {
         try {
             const response = await fetch(
-                `https://localhost:7178/api/Sessions/${sessionIdValue}/next-number`
+                `/api/Sessions/${sessionIdValue}/next-number`
             );
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`Fetch next number error: ${text}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
             setCurrentNumber(data.number);
             setUserAnswer("");
         } catch (error) {
-            console.error(error);
-            alert(String(error));
+            console.error("Error fetching next number:", error);
         }
     };
 
     const handleSubmitAnswer = async () => {
-        if (!sessionId || currentNumber === null) return;
+        if (!sessionId || !currentNumber) return;
 
         try {
             const response = await fetch(
-                `https://localhost:7178/api/Sessions/${sessionId}/answer`,
+                `/api/Sessions/${sessionId}/check-answer`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        number: currentNumber,
-                        userAnswer: userAnswer,
-                    }),
+                    body: JSON.stringify({ answer: userAnswer }),
                 }
             );
 
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`Submit answer error: ${text}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            if (data.correct) {
+            if (data.isCorrect) {
                 setCorrectCount((prev) => prev + 1);
                 correctAudio.current?.play();
             } else {
@@ -198,10 +191,10 @@ function PlayGamePage() {
                 incorrectAudio.current?.play();
             }
 
+            // Fetch next number
             fetchNextNumber(sessionId);
         } catch (error) {
-            console.error(error);
-            alert(String(error));
+            console.error("Error checking answer:", error);
         }
     };
 

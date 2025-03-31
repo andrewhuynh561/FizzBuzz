@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
-import '../CSS/GamePage.css'; 
+import '../CSS/GamePage.css';
+
 interface Game {
     id: number;
     name: string;
@@ -25,16 +26,20 @@ function CreateGamePage() {
 
     
     useEffect(() => {
-        fetch("https://localhost:7178/api/Games") 
-            .then(async (res) => {
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(`Error fetching games: ${text}`);
+        const fetchGames = async () => {
+            try {
+                const response = await fetch("https://localhost:7178/api/Games");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return res.json();
-            })
-            .then((data: Game[]) => setGames(data))
-            .catch((err) => console.error(err));
+                const data = await response.json();
+                setGames(data);
+            } catch (error) {
+                console.error("Error fetching games:", error);
+            }
+        };
+
+        fetchGames();
     }, []);
 
   
@@ -59,44 +64,34 @@ function CreateGamePage() {
     };
 
   
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        fetch("https://localhost:7178/api/Games", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: gameName,
-                author: authorName,
-                minNumber,
-                maxNumber,
-                rules
-            }),
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const text = await response.text();
-                    alert(`Error creating game: ${text}`);
-                    return;
-                }
-                //const data = await response.json();
-                //alert(`Game created successfully! ID: ${data.gameId}`);
-
-                
-                const updatedGames = await fetch("https://localhost:7178/api/Games").then(res => res.json());
-                setGames(updatedGames);
-
-               
-                setGameName("");
-                setAuthorName("");
-                setRules([{ divisor: 0, replacementText: "" }]);
-                setMinNumber(1);
-                setMaxNumber(100);
-            })
-            .catch(err => {
-                console.error("Fetch error:", err);
-                alert("Failed to create game.");
+        try {
+            const response = await fetch("https://localhost:7178/api/Games", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: gameName,
+                    author: authorName,
+                    rules: rules,
+                }),
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Refresh the games list
+            const updatedGames = await fetch("https://localhost:7178/api/Games").then(res => res.json());
+            setGames(updatedGames);
+            setGameName("");
+            setAuthorName("");
+            setRules([]);
+        } catch (error) {
+            console.error("Error creating game:", error);
+        }
     };
 
     return (

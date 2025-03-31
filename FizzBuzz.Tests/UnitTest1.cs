@@ -18,7 +18,6 @@ namespace FizzBuzz.Tests
 
         public GamesControllerTests()
         {
-            // Setup in-memory database
             var options = new DbContextOptionsBuilder<FizzBuzzDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
@@ -36,7 +35,6 @@ namespace FizzBuzz.Tests
         [Fact]
         public async Task CreateGame_Success()
         {
-            // Arrange
             var request = new CreateGame
             {
                 Name = "Classic FizzBuzz",
@@ -50,10 +48,6 @@ namespace FizzBuzz.Tests
 
             // Act
             var result = await _controller.CreateGame(request);
-
-            //// Assert
-            //var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            //Assert.Equal(200, createdResult.StatusCode);
 
             var gamesInDb = await _dbContext.Games.Include(g => g.Rules).ToListAsync();
             Assert.Single(gamesInDb);
@@ -75,10 +69,8 @@ namespace FizzBuzz.Tests
             _dbContext.Games.Add(game);
             await _dbContext.SaveChangesAsync();
 
-            // Act
             var result = await _controller.GetAllGames();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var games = Assert.IsType<List<Games>>(okResult.Value);
             Assert.Single(games);

@@ -21,7 +21,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// POST /api/sessions/start
-        /// Starts a new game session for the specified game
         /// </summary>
         [HttpPost("start")]
         public async Task<IActionResult> StartSession([FromBody] StartSession request)
@@ -55,7 +54,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// GET /api/sessions/{sessionId}/next-number
-        /// Retrieves a new random non-duplicate number for the session
         /// </summary>
         [HttpGet("{sessionId}/next-number")]
         public async Task<IActionResult> GetNextNumber(int sessionId)
@@ -98,7 +96,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// POST /api/sessions/{sessionId}/answer
-        /// Submits an answer for the given random number
         /// </summary>
         [HttpPost("{sessionId}/answer")]
         public async Task<IActionResult> SubmitAnswer(int sessionId, [FromBody] SubmitAnswer request)
@@ -136,7 +133,6 @@ namespace FizzBuzz.Api.Controllers
 
         /// <summary>
         /// GET /api/sessions/{sessionId}/results
-        /// Gets the final scoreboard for a session (correct/incorrect counts)
         /// </summary>
         [HttpGet("{sessionId}/results")]
         public async Task<IActionResult> GetResults(int sessionId)
@@ -153,7 +149,7 @@ namespace FizzBuzz.Api.Controllers
         }
 
         /// <summary>
-        /// FizzBuzz-like logic to compute the replacement string for a number
+        /// FizzBu
         /// </summary>
         private string ComputeReplacement(int number, ICollection<GameRule> rules)
         {
