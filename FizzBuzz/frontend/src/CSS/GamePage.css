@@ -1,26 +1,23 @@
-﻿/* CreateGamePage.css */
+﻿
 
 .create-game-container {
     min-height:130vh;
-    /* Example: a different background image or color from your create page */
     background: url('../assets/1.jpg') no-repeat center center;
     background-size: cover;
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #0e0202; /* or suitable color for text */
+    color: #0e0202; 
     position: relative;
     padding: 2rem;
     font-size: 1.5rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    /* Set a default font family */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
     .create-game-container h1 {
         text-align: center;
         margin-bottom: 1.5rem;
-        /* Purple accent color for the main heading */
         color: #7f2fff;
     }
 
@@ -29,14 +26,12 @@
     flex-direction: column;
 }
 
-/* Labels above each input */
 .form-label {
     margin: 0.5rem 0 0.25rem;
     font-weight: 600;
     color: #555;
 }
 
-/* Standard text inputs */
 .text-input {
     padding: 0.5rem;
     border: 1px solid #ccc;
@@ -45,7 +40,6 @@
     font-size: 1rem;
 }
 
-/* Container for the rules (the repeating rows) */
 .rules-container {
     display: flex;
     flex-direction: column;
@@ -53,14 +47,12 @@
     margin-bottom: 1rem;
 }
 
-/* Each row for "When divisible by X say Y" */
 .rule-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-/* Small input fields for divisor and replacement text */
 .small-input {
     width: 60px;
     padding: 0.4rem;
@@ -68,7 +60,6 @@
     border-radius: 4px;
 }
 
-/* Buttons for adding and removing rules */
 .add-rule-btn,
 .remove-rule-btn {
     background-color: transparent;
@@ -85,7 +76,6 @@
     line-height: 1;
 }
 
-/* Container for the min/max range inputs */
 .range-container {
     display: flex;
     justify-content: space-between;
@@ -104,7 +94,6 @@
         color: #555;
     }
 
-/* The main "Create Game!" submit button */
 .create-btn {
     background-color: #7f2fff;
     color: #fff;

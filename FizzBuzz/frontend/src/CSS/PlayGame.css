@@ -1,12 +1,11 @@
 ﻿.play-game-page {
     min-height: 130vh;
-    /* Example: a different background image or color from your create page */
     background: url('../assets/2.jpg') no-repeat center center;
     background-size: cover;
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #0e0202; /* or suitable color for text */
+    color: #0e0202; 
     position: relative;
     padding: 2rem;
     font-size:1.5rem;

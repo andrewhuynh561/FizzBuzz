@@ -1,13 +1,5 @@
 ﻿import { useEffect, useState, useRef } from 'react';
 import '../CSS/PlayGame.css';
-import timerSound from '../assets/sounds/timer.mp3';
-import correctSound from '../assets/sounds/correct.mp3';
-import incorrectSound from '../assets/sounds/incorrect.mp3';
-// NEW: import winning sound
-import winningSound from '../assets/sounds/winning.mp3';
-
-// Add NodeJS types
-/// <reference types="node" />
 
 interface GameRule {
     id?: number;
@@ -35,50 +27,43 @@ function PlayGamePage() {
 
     // 2) Session & Timer
     const [sessionId, setSessionId] = useState<number | null>(null);
+    const [endTime, setEndTime] = useState<Date | null>(null);
     const [timeLeft, setTimeLeft] = useState<number>(0);
 
-    // 3) Audio references
-    const beepAudio = useRef<HTMLAudioElement | null>(null);
-    const correctAudio = useRef<HTMLAudioElement | null>(null);
-    const incorrectAudio = useRef<HTMLAudioElement | null>(null);
-    // NEW: winning audio ref
-    const winningAudio = useRef<HTMLAudioElement | null>(null);
-
-    // 4) Gameplay
+    // 3) Gameplay
     const [currentNumber, setCurrentNumber] = useState<number | null>(null);
     const [userAnswer, setUserAnswer] = useState("");
     const [correctCount, setCorrectCount] = useState(0);
     const [incorrectCount, setIncorrectCount] = useState(0);
 
-    // Fix timer type to use ReturnType<typeof setInterval>
+    // Timer reference (for clearing interval on unmount)
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    useEffect(() => {
-        beepAudio.current = new Audio(timerSound);
-        correctAudio.current = new Audio(correctSound);
-        incorrectAudio.current = new Audio(incorrectSound);
-        // NEW: initialize winning audio
-        winningAudio.current = new Audio(winningSound);
-    }, []);
+    // Final results popup state
+    const [showResults, setShowResults] = useState(false);
+
+    // total attempts
+    const totalAttempts = correctCount + incorrectCount;
 
     useEffect(() => {
-        const fetchGames = async () => {
-            try {
-                const response = await fetch("/api/Games");
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+        fetch("https://localhost:7178/api/Games")
+            .then(async (res) => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Error fetching games: ${text}`);
                 }
-                const data = await response.json();
+                return res.json();
+            })
+            .then((data: Game[]) => {
                 setGames(data);
                 if (data.length > 0) {
                     setSelectedGameId(data[0].id);
                 }
-            } catch (error) {
-                console.error("Error fetching games:", error);
-            }
-        };
-
-        fetchGames();
+            })
+            .catch((err) => {
+                console.error(err);
+                alert("Failed to load games. Check console for details.");
+            });
     }, []);
 
     const handleStartSession = async () => {
@@ -87,7 +72,7 @@ function PlayGamePage() {
             return;
         }
         try {
-            const response = await fetch("/api/Sessions/start", {
+            const response = await fetch("https://localhost:7178/api/Sessions/start", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -104,12 +89,9 @@ function PlayGamePage() {
             const data: StartSessionResponse = await response.json();
             setSessionId(data.sessionId);
 
-            // Convert endTime string to Date and calculate timeLeft
+            // Convert endTime string to Date
             const end = new Date(data.endTime);
-            const now = new Date();
-            const diffMs = end.getTime() - now.getTime();
-            const diffSec = Math.max(0, Math.floor(diffMs / 1000));
-            setTimeLeft(diffSec);
+            setEndTime(end);
 
             // Reset scoreboard
             setCorrectCount(0);
@@ -120,17 +102,11 @@ function PlayGamePage() {
 
             // Start interval for countdown
             timerRef.current = setInterval(() => {
-                const now = new Date();
-                const diffMs = end.getTime() - now.getTime();
-                const diffSec = Math.max(0, Math.floor(diffMs / 1000));
-                setTimeLeft(diffSec);
-
-                if (diffSec <= 0 && timerRef.current) {
-                    clearInterval(timerRef.current);
-                    timerRef.current = null;
-                    winningAudio.current?.play();
-                }
+                updateTimeLeft(end);
             }, 1000);
+
+            // Immediately update timeLeft
+            updateTimeLeft(end);
 
             // Fetch the first random number
             fetchNextNumber(data.sessionId);
@@ -140,61 +116,70 @@ function PlayGamePage() {
         }
     };
 
-    useEffect(() => {
-        const isGameActive = sessionId !== null && timeLeft > 0;
-        if (isGameActive) {
-            beepAudio.current?.play().catch((err) => {
-                console.warn("Beep audio failed to play:", err);
-            });
+    const updateTimeLeft = (end: Date) => {
+        const now = new Date();
+        const diffMs = end.getTime() - now.getTime();
+        const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+        setTimeLeft(diffSec);
+
+        // If time is up, clear the interval
+        if (diffSec <= 0 && timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+            setShowResults(true);
         }
-    }, [timeLeft, sessionId]);
+    };
 
     const fetchNextNumber = async (sessionIdValue: number) => {
         try {
             const response = await fetch(
-                `/api/Sessions/${sessionIdValue}/next-number`
+                `https://localhost:7178/api/Sessions/${sessionIdValue}/next-number`
             );
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                throw new Error(`Fetch next number error: ${text}`);
             }
             const data = await response.json();
             setCurrentNumber(data.number);
             setUserAnswer("");
         } catch (error) {
-            console.error("Error fetching next number:", error);
+            console.error(error);
+            alert(String(error));
         }
     };
 
     const handleSubmitAnswer = async () => {
-        if (!sessionId || !currentNumber) return;
+        if (!sessionId || currentNumber === null) return;
 
         try {
             const response = await fetch(
-                `/api/Sessions/${sessionId}/check-answer`,
+                `https://localhost:7178/api/Sessions/${sessionId}/answer`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ answer: userAnswer }),
+                    body: JSON.stringify({
+                        number: currentNumber,
+                        userAnswer: userAnswer,
+                    }),
                 }
             );
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
+                throw new Error(`Submit answer error: ${text}`);
             }
 
             const data = await response.json();
-            if (data.isCorrect) {
+            if (data.correct) {
                 setCorrectCount((prev) => prev + 1);
-                correctAudio.current?.play();
             } else {
                 setIncorrectCount((prev) => prev + 1);
-                incorrectAudio.current?.play();
             }
 
-            // Fetch next number
             fetchNextNumber(sessionId);
         } catch (error) {
-            console.error("Error checking answer:", error);
+            console.error(error);
+            alert(String(error));
         }
     };
 
@@ -207,6 +192,7 @@ function PlayGamePage() {
     }, []);
 
     const isGameActive = sessionId !== null && timeLeft > 0;
+
     const currentGame = games.find((g) => g.id === selectedGameId);
 
     return (

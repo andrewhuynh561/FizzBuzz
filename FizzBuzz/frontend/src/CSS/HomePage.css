@@ -1,26 +1,16 @@
-﻿/* HomePage.css */
-
-/* Container centers the content with some padding */
-/* HomePage.css */
-
+﻿
 .home-container {
-    /* Ensure the container is at least full screen height, so background is visible */
     min-height: 100vh;
-    /* Background image: adjust the path if your file is elsewhere */
     background: url('../assets/unnamed.png') no-repeat center center;
-    /* Make it fill the container, preserving aspect ratio */
     background-size: cover;
-    /* If you want the content to be readable, consider adding some padding or a translucent overlay */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #fff; /* if the background is dark, you might want light text */
+    color: #fff; 
     filter: saturate(1.5) brightness(1.1);
 }
 
-
-/* Large, bold heading */
 .home-title {
     font-size: 5.5rem;
     margin-bottom: 1rem;
@@ -28,7 +18,6 @@
     letter-spacing: 1px;
 }
 
-/* Paragraph for the game description */
 .home-description {
     font-size: 1.2rem;
     line-height: 2.5;
@@ -37,14 +26,13 @@
     color: #090560;
 }
 
-/* Boxes container: put them side by side with a gap */
+
 .boxes-container {
     display: flex;
     gap: 2rem;
     margin-bottom: 2rem;
 }
 
-/* Common styles for both boxes */
 .box {
     flex: 1;
     min-width: 100px;
@@ -56,22 +44,18 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-/* Foo box: a bright green */
 .box-foo {
-    background: #6bf58d; /* bright green */
+    background: #6bf58d; 
     color: #0f381a;
 }
 
-/* Boo box: a bright pink */
 .box-boo {
-    background: #ff93e3; /* bright pink */
+    background: #ff93e3; 
     color: #5e0036;
 }
 
-/* Container for the two navigation buttons */
 .buttons-container {
     display: flex;
     gap: 1rem;
 }
 
-/* A general style for both nav buttons */
