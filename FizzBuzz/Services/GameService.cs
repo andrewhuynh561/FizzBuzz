@@ -18,9 +18,9 @@ namespace FizzBuzz.Services
             _db = db;
         }
 
-        public async Task<ServiceResult<Games>> CreateGameAsync(CreateGame request)
+        public async Task<Models.ServiceResult<Games>> CreateGameAsync(CreateGame request)
         {
-            var result = new ServiceResult<Games>();
+            var result = new Models.ServiceResult<Games>();
 
             if (request.Rules == null || !request.Rules.Any())
             {
@@ -91,9 +91,9 @@ namespace FizzBuzz.Services
         }
 
 
-        public async Task<ServiceResult<bool>> DeleteGameAsync(int id)
+        public async Task<Models.ServiceResult<bool>> DeleteGameAsync(int id)
         {
-            var result = new ServiceResult<bool>();
+            var result = new Models.ServiceResult<bool>();
 
             try
             {
@@ -128,9 +128,9 @@ namespace FizzBuzz.Services
         }
 
 
-        public async Task<ServiceResult<Games>> GetGameByIdAsync(int id)
+        public async Task<Models.ServiceResult<Games>> GetGameByIdAsync(int id)
         {
-            var result = new ServiceResult<Games>();
+            var result = new Models.ServiceResult<Games>();
 
             try
             {
@@ -163,9 +163,9 @@ namespace FizzBuzz.Services
         }
 
 
-        public async Task<ServiceResult<IEnumerable<Games>>> GetAllGamesAsync()
+        public async Task<Models.ServiceResult<IEnumerable<Games>>> GetAllGamesAsync()
         {
-            var result = new ServiceResult<IEnumerable<Games>>();
+            var result = new Models.ServiceResult<IEnumerable<Games>>();
 
             try
             {

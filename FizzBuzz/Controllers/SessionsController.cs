@@ -1,22 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using FizzBuzz.Data;
+using Microsoft.AspNetCore.Mvc;
 using FizzBuzz.Models;
-using FizzBuzz.Contracts;
-using Microsoft.EntityFrameworkCore;
-using FizzBuzz.Data;
-using FizzBuzz.Models;
+using FizzBuzz.Services;
+using System.Threading.Tasks;
 
-namespace FizzBuzz.Api.Controllers
+namespace FizzBuzz.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class SessionsController : ControllerBase
     {
-        private readonly FizzBuzzDbContext _db;
+        private readonly ISessionService _sessionService;
 
-        public SessionsController(FizzBuzzDbContext db)
+        public SessionsController(ISessionService sessionService)
         {
-            _db = db;
+            _sessionService = sessionService;
         }
 
         /// <summary>
@@ -25,31 +22,10 @@ namespace FizzBuzz.Api.Controllers
         [HttpPost("start")]
         public async Task<IActionResult> StartSession([FromBody] StartSession request)
         {
-            // Validate the game exists
-            var game = await _db.Games.Include(g => g.Rules)
-                                      .FirstOrDefaultAsync(g => g.Id == request.GameId);
-
-            if (game == null)
-                return NotFound("Game not found.");
-
-            // Create new session
-            var session = new Session
-            {
-                GameId = game.Id,
-                StartTime = DateTime.UtcNow,
-                EndTime = DateTime.UtcNow.AddSeconds(request.DurationSeconds),
-                CorrectCount = 0,
-                IncorrectCount = 0
-            };
-
-            _db.Sessions.Add(session);
-            await _db.SaveChangesAsync();
-
-            return Ok(new
-            {
-                sessionId = session.Id,
-                endTime = session.EndTime
-            });
+            var result = await _sessionService.StartSessionAsync(request);
+            return StatusCode(result.StatusCode, result.Success ? 
+                (object)new { sessionId = result.Data?.Id, endTime = result.Data?.EndTime } : 
+                result.ErrorMessage);
         }
 
         /// <summary>
@@ -58,41 +34,11 @@ namespace FizzBuzz.Api.Controllers
         [HttpGet("{sessionId}/next-number")]
         public async Task<IActionResult> GetNextNumber(int sessionId)
         {
-            var session = await _db.Sessions
-                .Include(s => s.Game)
-                .FirstOrDefaultAsync(s => s.Id == sessionId);
-
-            if (session == null)
-                return NotFound("Session not found.");
-
-            if (DateTime.UtcNow > session.EndTime)
-                return BadRequest("Session has expired.");
-
-            // Use the range from the game
-            var min = session.Game!.MinNumber;
-            var max = session.Game!.MaxNumber;
-
-            var random = new Random();
-            int nextNum;
-            bool isDuplicate;
-            do
-            {
-                // random.Next(min, max+1) so it includes maxNumber
-                nextNum = random.Next(min, max + 1);
-                isDuplicate = await _db.SessionRandomNumbers
-                    .AnyAsync(x => x.SessionId == sessionId && x.Number == nextNum);
-            } while (isDuplicate);
-
-            _db.SessionRandomNumbers.Add(new SessionRandomNumber
-            {
-                SessionId = sessionId,
-                Number = nextNum
-            });
-            await _db.SaveChangesAsync();
-
-            return Ok(new { number = nextNum });
+            var result = await _sessionService.GetNextNumberAsync(sessionId);
+            return StatusCode(result.StatusCode, result.Success ? 
+                (object)new { number = result.Data.Number } : 
+                result.ErrorMessage);
         }
-
 
         /// <summary>
         /// POST /api/sessions/{sessionId}/answer
@@ -100,35 +46,10 @@ namespace FizzBuzz.Api.Controllers
         [HttpPost("{sessionId}/answer")]
         public async Task<IActionResult> SubmitAnswer(int sessionId, [FromBody] SubmitAnswer request)
         {
-            var session = await _db.Sessions
-                                   .Include(s => s.Game)
-                                   .ThenInclude(g => g.Rules)
-                                   .FirstOrDefaultAsync(s => s.Id == sessionId);
-
-            if (session == null)
-                return NotFound("Session not found.");
-
-            // Check if session is expired
-            if (DateTime.UtcNow > session.EndTime)
-                return BadRequest("Session has expired.");
-
-            var computedAnswer = ComputeReplacement(request.Number, session.Game!.Rules);
-
-            // Compare answer
-            bool isCorrect = string.Equals(request.UserAnswer, computedAnswer, StringComparison.OrdinalIgnoreCase);
-
-            if (isCorrect)
-                session.CorrectCount++;
-            else
-                session.IncorrectCount++;
-
-            await _db.SaveChangesAsync();
-
-            return Ok(new
-            {
-                correct = isCorrect,
-                expected = computedAnswer
-            });
+            var result = await _sessionService.SubmitAnswerAsync(sessionId, request);
+            return StatusCode(result.StatusCode, result.Success ? 
+                (object)new { correct = result.Data.IsCorrect, expected = result.Data.ExpectedAnswer } : 
+                result.ErrorMessage);
         }
 
         /// <summary>
@@ -137,37 +58,10 @@ namespace FizzBuzz.Api.Controllers
         [HttpGet("{sessionId}/results")]
         public async Task<IActionResult> GetResults(int sessionId)
         {
-            var session = await _db.Sessions.FindAsync(sessionId);
-            if (session == null)
-                return NotFound("Session not found.");
-
-            return Ok(new
-            {
-                correctCount = session.CorrectCount,
-                incorrectCount = session.IncorrectCount
-            });
-        }
-
-        /// <summary>
-        /// FizzBu
-        /// </summary>
-        private string ComputeReplacement(int number, ICollection<GameRule> rules)
-        {
-            var result = string.Empty;
-
-            foreach (var rule in rules)
-            {
-                if (number % rule.Divisor == 0)
-                {
-                    result += rule.ReplacementText;
-                }
-            }
-
-            // If no divisors matched, just return the number
-            if (string.IsNullOrEmpty(result))
-                result = number.ToString();
-
-            return result;
+            var result = await _sessionService.GetSessionResultsAsync(sessionId);
+            return StatusCode(result.StatusCode, result.Success ? 
+                (object)new { correctCount = result.Data.CorrectCount, incorrectCount = result.Data.IncorrectCount } : 
+                result.ErrorMessage);
         }
     }
 }

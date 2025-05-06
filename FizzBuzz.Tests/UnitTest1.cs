@@ -52,7 +52,7 @@ namespace FizzBuzz.Tests
             };
 
             _mockGameService.Setup(s => s.CreateGameAsync(It.IsAny<CreateGame>()))
-                .ReturnsAsync(new ServiceResult<Games> { Success = true, Data = expectedGame, StatusCode = 201 });
+                .ReturnsAsync(new FizzBuzz.Models.ServiceResult<Games> { Success = true, Data = expectedGame, StatusCode = 201 });
 
             // Act
             var result = await _controller.CreateGame(request);
@@ -78,7 +78,7 @@ namespace FizzBuzz.Tests
             };
 
             _mockGameService.Setup(s => s.GetGameByIdAsync(1))
-                .ReturnsAsync(new ServiceResult<Games> { Success = true, Data = expectedGame, StatusCode = 200 });
+                .ReturnsAsync(new FizzBuzz.Models.ServiceResult<Games> { Success = true, Data = expectedGame, StatusCode = 200 });
 
             // Act
             var result = await _controller.GetGameById(1);
@@ -104,7 +104,7 @@ namespace FizzBuzz.Tests
 
 
             _mockGameService.Setup(s => s.GetAllGamesAsync())
-                .ReturnsAsync(new ServiceResult<IEnumerable<Games>> 
+                .ReturnsAsync(new FizzBuzz.Models.ServiceResult<IEnumerable<Games>> 
                 { 
                     Success = true, 
                     Data = expectedGames, 
@@ -129,7 +129,7 @@ namespace FizzBuzz.Tests
         {
             // Arrange
             _mockGameService.Setup(s => s.DeleteGameAsync(1))
-                .ReturnsAsync(new ServiceResult<bool> { Success = true, Data = true, StatusCode = 204 });
+                .ReturnsAsync(new FizzBuzz.Models.ServiceResult<bool> { Success = true, Data = true, StatusCode = 204 });
 
             // Act
             var result = await _controller.DeleteGame(1);
