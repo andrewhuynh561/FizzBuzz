@@ -1,5 +1,6 @@
-using FizzBuzz.Data;              // <-- For FizzBuzzDbContext
-using Microsoft.EntityFrameworkCore; // <-- For UseSqlServer
+using FizzBuzz.Data;             
+using Microsoft.EntityFrameworkCore; 
+using FizzBuzz.Services;           
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,24 +24,24 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
     {
-        // This tells System.Text.Json to ignore (skip) any cycles
-        // rather than throwing an exception.
+      
         opts.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddScoped<IGameService, GameService>();
+
 var app = builder.Build();
 
-// 4) (Optional) Auto-run migrations when app starts
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FizzBuzzDbContext>();
     db.Database.EnsureCreated(); // or db.Database.Migrate();
 }
 
-// 5) The rest of the pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

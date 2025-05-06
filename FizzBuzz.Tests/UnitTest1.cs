@@ -1,40 +1,31 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 using FizzBuzz.Contracts;
-using FizzBuzz.Api.Controllers;
-using FizzBuzz.Data;
+using FizzBuzz.Controllers;
 using FizzBuzz.Models;
+using FizzBuzz.Services;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 namespace FizzBuzz.Tests
 {
-    public class GamesControllerTests : IDisposable
+    public class GamesControllerTests
     {
-        private readonly FizzBuzzDbContext _dbContext;
+        private readonly Mock<IGameService> _mockGameService;
         private readonly GamesController _controller;
 
         public GamesControllerTests()
         {
-            var options = new DbContextOptionsBuilder<FizzBuzzDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            _dbContext = new FizzBuzzDbContext(options);
-            _controller = new GamesController(_dbContext);
-        }
-
-        public void Dispose()
-        {
-            _dbContext.Database.EnsureDeleted();
-            _dbContext.Dispose();
+            _mockGameService = new Mock<IGameService>();
+            _controller = new GamesController(_mockGameService.Object);
         }
 
         [Fact]
         public async Task CreateGame_Success()
         {
+            // Arrange
             var request = new CreateGame
             {
                 Name = "Classic FizzBuzz",
@@ -46,35 +37,106 @@ namespace FizzBuzz.Tests
                 }
             };
 
+            var expectedGame = new Games
+            {
+                Id = 1,
+                Name = "Classic FizzBuzz",
+                Author = "Alice",
+                Rules = new List<GameRule>
+                {
+                    new GameRule { Divisor = 3, ReplacementText = "Fizz" },
+                    new GameRule { Divisor = 5, ReplacementText = "Buzz" }
+                },
+                MinNumber = 1,
+                MaxNumber = 100
+            };
+
+            _mockGameService.Setup(s => s.CreateGameAsync(It.IsAny<CreateGame>()))
+                .ReturnsAsync(new ServiceResult<Games> { Success = true, Data = expectedGame, StatusCode = 201 });
+
             // Act
             var result = await _controller.CreateGame(request);
 
-            var gamesInDb = await _dbContext.Games.Include(g => g.Rules).ToListAsync();
-            Assert.Single(gamesInDb);
-            Assert.Equal("Classic FizzBuzz", gamesInDb[0].Name);
-            Assert.Equal("Alice", gamesInDb[0].Author);
-            Assert.Equal(2, gamesInDb[0].Rules.Count);
+            // Assert
+            var okResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(201, okResult.StatusCode);
+            var response = okResult.Value as dynamic;
+            Assert.NotNull(response);
+            Assert.Equal(1, response.gameId);
         }
 
+
         [Fact]
-        public async Task GetGames_Success()
+        public async Task GetGameById_Success()
         {
             // Arrange
-            var game = new Games
+            var expectedGame = new Games
             {
+                Id = 1,
                 Name = "Test FizzBuzz",
-                Author = "Bob",
-                CreatedAt = DateTime.UtcNow
+                Author = "Bob"
             };
-            _dbContext.Games.Add(game);
-            await _dbContext.SaveChangesAsync();
 
+            _mockGameService.Setup(s => s.GetGameByIdAsync(1))
+                .ReturnsAsync(new ServiceResult<Games> { Success = true, Data = expectedGame, StatusCode = 200 });
+
+            // Act
+            var result = await _controller.GetGameById(1);
+
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var game = okResult.Value as Games;
+            Assert.NotNull(game);
+            Assert.Equal("Test FizzBuzz", game.Name);
+        }
+
+
+        [Fact]
+        public async Task GetAllGames_Success()
+        {
+            // Arrange
+            var expectedGames = new List<Games>
+            {
+                new Games { Id = 1, Name = "Test 1", Author = "Alice" },
+                new Games { Id = 2, Name = "Test 2", Author = "Bob" }
+            };
+
+
+            _mockGameService.Setup(s => s.GetAllGamesAsync())
+                .ReturnsAsync(new ServiceResult<IEnumerable<Games>> 
+                { 
+                    Success = true, 
+                    Data = expectedGames, 
+                    StatusCode = 200 
+                });
+
+
+            // Act
             var result = await _controller.GetAllGames();
 
+
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var games = Assert.IsType<List<Games>>(okResult.Value);
-            Assert.Single(games);
-            Assert.Equal("Test FizzBuzz", games[0].Name);
+            var games = okResult.Value as IEnumerable<Games>;
+            Assert.NotNull(games);
+            Assert.Equal(2, games.Count());
+        }
+
+
+        [Fact]
+        public async Task DeleteGame_Success()
+        {
+            // Arrange
+            _mockGameService.Setup(s => s.DeleteGameAsync(1))
+                .ReturnsAsync(new ServiceResult<bool> { Success = true, Data = true, StatusCode = 204 });
+
+            // Act
+            var result = await _controller.DeleteGame(1);
+
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
         }
     }
 }
